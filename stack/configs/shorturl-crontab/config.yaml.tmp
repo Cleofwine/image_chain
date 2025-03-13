@@ -1,0 +1,13 @@
+redis:
+  host: ""
+  port: 6379
+  pwd: ""
+mysql:
+  dsn: "root:password@tcp(localhost:3306)/shorturl?collation=utf8mb4_unicode_ci&charset=utf8mb4"
+  max_life_time: 3306
+  max_open_conn: 10
+  max_idle_conn: 10
+log:
+  # panic,fatal,error,warn,warning,info,debug,trace
+  level: "info"
+  logPath: "runtime/logs/app.log"

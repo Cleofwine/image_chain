@@ -1,0 +1,16 @@
+http:
+  ip: 0.0.0.0
+  port: 9999
+cos:
+  bucketUrl: ""
+  secretId: ""
+  secretKey: ""
+  cdnDomain: ""
+dependOn:
+  shortUrl:
+    address: "shorturl-grpc:50059" # 部署在同一个overlay网络，可以使用服务发现
+    accessToken: ""
+log:
+  # panic,fatal,error,warn,warning,info,debug,trace
+  level: "info"
+  logPath: "runtime/logs/app.log"

@@ -1,0 +1,146 @@
+version: '3.8'
+
+# 包含服务： mediahub mediahub-web shorturl-crontab shorturl-grpc shorturl-proxy
+services:
+  mediahub: # 这个服务只对stack内部提供，所以不用做端口映射
+    image: mediahub:0.1.0
+    ports:
+      - "9999:9999"
+    deploy:
+      mode: replicated
+      replicas: 2
+      endpoint_mode: vip
+      resources:
+        limits:
+          cpus: '0.3'
+        reservations:
+          cpus: '0.1'
+      update_config:
+        parallelism: 2
+        order: start-first # 先启动再停止，防止更新的时候没有可用节点
+      rollback_config:
+        parallelism: 2
+        order: start-first
+    # commond 会替换原来dockerfile中的entrypoint
+    entrypoint: "/app/mediahub"
+    # commond 会替换原来dockerfile中的cmd
+    command: ["--config=/app/config.yaml"]
+    configs:
+      - source: mediahub-conf
+        target: /app/config.yaml
+    depends_on: # 依赖关系
+      - shorturl-crontab
+      - shorturl-grpc
+      - shorturl-proxy
+    networks:
+      - mediahub-net
+  mediahub-web:
+    image: mediahub-web:0.1.0
+    ports:
+      - "9997:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
+      resources:
+        limits:
+          cpus: '0.3'
+        reservations:
+          cpus: '0.1'
+      update_config:
+        parallelism: 1
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        order: start-first
+    depends_on: # 依赖关系
+      - mediahub
+    networks:
+      - mediahub-net
+  shorturl-crontab:
+    image: shorturl-crontab:0.1.0
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
+      resources:
+        limits:
+          cpus: '0.3'
+        reservations:
+          cpus: '0.1'
+      update_config:
+        parallelism: 1
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        order: start-first  
+    configs:
+      - source: shorturl-crontab-conf
+        target: /app/config.yaml
+    networks:
+      - mediahub-net
+  shorturl-grpc:
+    image: shorturl-grpc:0.1.0 
+    deploy:
+      # 守护进程模式，不需要指定副本数，一个节点一定有一个副本
+      # mode: global 
+      mode: replicated
+      replicas: 2
+      endpoint_mode: vip
+      resources:
+        limits:
+          cpus: '0.3'
+        reservations:
+          cpus: '0.1'
+      update_config:
+        parallelism: 2
+        order: start-first
+      rollback_config:
+        parallelism: 2
+        order: start-first  
+    configs:
+      - source: shorturl-grpc-conf
+        target: /app/config.yaml
+    networks:
+      - mediahub-net
+  shorturl-proxy:
+    image: shorturl-proxy:0.1.0
+    ports:
+      - "9998:9998"
+    deploy:
+      mode: replicated
+      replicas: 2
+      endpoint_mode: vip
+      resources:
+        limits:
+          cpus: '0.3'
+        reservations:
+          cpus: '0.1'
+      update_config:
+        parallelism: 2
+        order: start-first
+      rollback_config:
+        parallelism: 2
+        order: start-first  
+    configs:
+      - source: shorturl-proxy-conf
+        target: /app/config.yaml
+    depends_on: # 依赖关系
+      - tokenizer
+      - keywords
+      - sensitive
+      - chatgpt-datas
+    networks:
+      - mediahub-net
+configs:
+  mediahub-conf:
+    file: ./configs/mediahub/config.yaml
+  shorturl-crontab-conf:
+    file: ./configs/shorturl-crontab/config.yaml
+  shorturl-grpc-conf:
+    file: ./configs/shorturl-grpc/config.yaml
+  shorturl-proxy-conf:
+    file: ./configs/shorturl-proxy/config.yaml
+networks:
+  mediahub-net:
+    driver: overlay

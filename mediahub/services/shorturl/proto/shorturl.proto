@@ -1,0 +1,18 @@
+syntax = "proto3";
+option go_package = "shorturl-grpc/proto";
+package shorturl_mediahub;
+
+message Url {
+    string url = 1;
+    bool isPublic = 2;
+}
+
+message ShortKey{
+    string key = 1;
+    bool isPublic = 2;
+}
+
+service ShortUrl {
+    rpc GetShortUrl(Url) returns(Url){}
+    rpc GetOriginalUrl(ShortKey) returns(Url){}
+}
