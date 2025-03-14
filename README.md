@@ -2,7 +2,7 @@
 - 基于微服务架构构建图床服务。通过独立部署的上传服务接收图片，利用腾讯云COS（已进行接口抽象，后续可替换为ceph等持久化方案）进行持久化存储并生成可追踪短链。
 
 # 服务结构
-![服务结构](http://cleofwine.icu/p/X "结构图")
+![服务结构](https://bbucket-1253575676.cos.ap-guangzhou.myqcloud.com/public/d385876d9c5e5f1db10ded2fe9ea7b7c.png "结构图")
 
 # 部署
 1. 前置准备
